@@ -1,0 +1,48 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+}
+#switchConatiner {
+    padding-top: 11px;
+}
+/* Material Design Lite */
+.mdl-layout__tab-bar {
+  height: 50px;
+}
+.full-width {
+    width: 100%;
+}
+.mdl-button--mini-fab {
+    max-width: 15px !important;
+    width: 15px !important;
+    min-width: 15px !important;
+    height: 15px !important;
+    font-size: 8px !important;
+}
+
+.react-selectize-control {
+    border: 0 !important;
+}
+
+.mdl-dialog {
+    min-width: 370px !important;
+}
+
+/* react-selectize */
+
+.react-selectize.root-node {
+    max-width: 250px !important;
+}
+
+/*.react-selectize.dropdown-menu.default .option-wrapper.highlight {*/
+    /*background: #bbd1fc !important;*/
+/*}*/
+
+/*.simple-value {*/
+    /*color: #fff !important;*/
+    /*background-color: rgb(96, 125, 139) !important;*/
+    /*border-radius: 15px !important;*/
+    /*line-height: 1em !important;*/
+    /*padding: 3px;*/
+/*}*/

@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+
+  "name": "WhatsAppKeeper",
+  "description": "Never, miss, A Beat..",
+  "version": "2.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "./index.html",
+    "default_title": "Keep Touch Now"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["./content_script.js"]
+    }
+  ],
+  "content_security_policy": "script-src 'self' https://web.whatsapp.com; object-src 'self'",
+  "web_accessible_resources" : ["/js/injected.js"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "https://web.whatsapp.com/*"
+  ]
+}
