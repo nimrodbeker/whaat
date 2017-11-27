@@ -1,7 +1,7 @@
 const ExtensionStore = 'ExtensionStore';
 const DAY = 3600 * 24;
 const timeConstraints = {earliest: 9, latest: 22};
-const LoggingContact = 'Logger';
+const LoggingContact = 'WHAATLogger';
 const runLogicInterval = 300 * 1000;
 const DRY_RUN_OVERRIDE = false;
 const getContactByPhone = (Contacts, pno) => {
@@ -10,7 +10,7 @@ const getContactByPhone = (Contacts, pno) => {
         if (contact === undefined || contact.id === undefined || contact.id === null) {
             continue;
         }
-        if (contact.id.indexOf(pno) === 0 && contact.id.indexOf('g.us') === -1)
+        if (contact.id.indexOf(pno) === 0 && !contact.isGroup)
             return contact;
     }
 };
@@ -43,6 +43,20 @@ const getLastMsgTime = (chat) => {
     }
 };
 
+const getOrCreateLogger = () => {
+    const contacts = window.Store.Contact.models;
+    let loggerContactObj = getContactByName(contacts, LoggingContact);
+    if(loggerContactObj === undefined){
+        for(let c in contacts){
+            const contact = contacts[c];
+            if(contact.__x_isMe) {
+                window.Store.Chat.createGroup(LoggingContact, undefined, undefined, [contact]);
+                return;
+            }
+        }
+    }
+   return getChatByID(window.Store.Chat.models, loggerContactObj.id);
+};
 
 const setContactObjects = (contact) => {
     contact.contactObject = contact.isPhoneNumber ? getContactByPhone(window.Store.Contact.models, contact.id) : getContactByName(window.Store.Contact.models, contact.id);
@@ -64,9 +78,10 @@ const Logic = () => {
         console.log('Resources not loaded yet.');
         return;
     }
-    const loggingChat = getChatByID(window.Store.Chat.models,
-        getContactByName(window.Store.Contact.models,
-            LoggingContact).id);
+    const loggingChat = getOrCreateLogger();
+    if(loggingChat===undefined){
+        return;
+    }
     const whatsappLog = (msg) => {
         sendMessage(loggingChat, msg)
     };

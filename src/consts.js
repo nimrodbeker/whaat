@@ -10,7 +10,7 @@ const Starters = {
     bro: ['מה איתך אח?'],
     women: ['היי את'],
     english: ['Hey!', 'Yo!', 'Wazzuppp??'],
-    group: ['יווווווו', 'אני מתגעגע', 'אז מתי אמרנו יושבים']
+    group: ['אז מתי אמרנו יושבים']
 };
 export const initialState = {
     active: false,

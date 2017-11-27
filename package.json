@@ -1,9 +1,10 @@
 {
-  "name": "whatsapp-controller",
-  "version": "0.1.0",
+  "name": "whatsapp-automator",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "materialize-css": "^0.100.2",
+    "moment": "^2.19.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-dom-factories": "^1.0.2",
