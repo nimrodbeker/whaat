@@ -13,13 +13,13 @@ injectScript(chrome.extension.getURL('/js/injected.js'), 'body');
 
 
 const syncExtension = () => {
-    chrome.runtime.sendMessage({store: sessionStorage.getItem(ExtensionStore)},
+    chrome.runtime.sendMessage({store: localStorage.getItem(ExtensionStore)},
         function (response) {
             if (DEBUG) {
                 console.log(response);
             }
             if (response !== undefined && response.state !== undefined && response.state !== null) {
-                sessionStorage.setItem(ExtensionStore, response.state);
+                localStorage.setItem(ExtensionStore, response.state);
             }
         });
 };
