@@ -9,10 +9,10 @@ export const headers = {
     interval: {display: 'Interval(Days)', sortable: true, sortFunction: getNumberCompareFunction},
     starters: {display: 'Starters', sortable: false},
     msgCount: {display: 'Messages(#)', sortable: true, sortFunction: getNumberCompareFunction},
-    lastMsg: {display: 'Last Msg', sortable: true, sortFunction: getNumberCompareFunction},
+    lastConversation: {display: 'Last Msg', sortable: true, sortFunction: getNumberCompareFunction},
     remove: {display: 'Remove Contact', sortable: false}
 };
-const displayOrder = ['id', 'name', 'interval', 'starters', 'lastMsg']; // 'msgCount'
+const displayOrder = ['id', 'name', 'interval', 'starters', 'lastConversation']; // 'msgCount'
 
 const Header = ({header, onHeaderClick}) => {
     return <th>

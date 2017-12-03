@@ -25,6 +25,9 @@ export const contacts = (state = initialState.contacts, action) => {
             delete newState[action.id];
             return newState;
         case UPDATE_CONTACT:
+            if(!state.hasOwnProperty(action.oldId)){
+                return state;
+            }
             delete newState[action.oldId];
             newState[action.contact.id] = action.contact;
             return newState;
