@@ -9,6 +9,7 @@ export const ADD_STARTERS_GROUP = 'ADD_STARTERS_GROUP';
 export const REMOVE_STARTERS_GROUP = 'REMOVE_STARTERS_GROUP';
 export const UPDATE_STARTERS_GROUP = 'UPDATE_STARTERS_GROUP';
 export const TOGGLE_ACTIVE = 'TOGGLE_ACTIVE';
+export const SET_ACTIVE = 'SET_ACTIVE';
 export const UPDATE_LAST_RUN = 'UPDATE_LAST_RUN';
 
 /*
@@ -16,6 +17,9 @@ export const UPDATE_LAST_RUN = 'UPDATE_LAST_RUN';
  */
 export function toggleActive() {
     return {type: TOGGLE_ACTIVE};
+}
+export function setActive(isActive) {
+    return {type: SET_ACTIVE, isActive};
 }
 
 export function addContact(contact) {

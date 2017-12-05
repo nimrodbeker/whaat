@@ -3,7 +3,7 @@ import {
     ADD_STARTERS_GROUP,
     CHANGE_SORT,
     REMOVE_CONTACT,
-    REMOVE_STARTERS_GROUP, TOGGLE_ACTIVE,
+    REMOVE_STARTERS_GROUP, SET_ACTIVE, TOGGLE_ACTIVE,
     UPDATE_CONTACT, UPDATE_LAST_RUN,
     UPDATE_STARTERS_GROUP
 } from './actions'
@@ -73,6 +73,8 @@ export const active = (state = initialState.active, action) => {
     switch (action.type) {
         case TOGGLE_ACTIVE:
             return !state;
+        case SET_ACTIVE:
+            return action.isActive;
         default:
             return state;
     }

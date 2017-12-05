@@ -15,9 +15,7 @@ const ContactsPage = ({appActive, toggleActive, lastRun}) => {
                 <Switch ripple onChange={toggleActive} checked={appActive}>Activate</Switch>
             </Cell>
         </Grid>
-        <strong>Last Run: </strong> {lastRun} <br />
-        {/*// TODO: Figure out is this not working*/}
-        {/*<Moment unix fromNow>{lastRun+10}</Moment>*/}
+        <strong>Last Run: </strong> {lastRun.toLocaleString()} <br />
         <ContactsList/>
     </div>
 };

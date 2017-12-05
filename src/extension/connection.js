@@ -1,6 +1,6 @@
 import {DEBUG} from "../consts";
 import {store as localStore} from "../index"
-import {updateContact, updateLastRun} from "../redux/actions";
+import {setActive, updateContact, updateLastRun} from "../redux/actions";
 
 const enrichLocalState = (appReturnedStore) => {
     appReturnedStore = JSON.parse(appReturnedStore);
@@ -9,6 +9,7 @@ const enrichLocalState = (appReturnedStore) => {
         const contact = appReturnedStore.contacts[c];
         localStore.dispatch(updateContact(contact.id, contact));
     }
+    localStore.dispatch(setActive(appReturnedStore.active));
 };
 if(window.chrome.runtime.onMessage !== undefined) {
     window.chrome.runtime.onMessage.addListener(
