@@ -1,4 +1,4 @@
-const DEBUG = false;
+const DEBUG = true;
 const ExtensionStore = 'ExtensionStore';
 
 const injectScript = (file, node) => {
@@ -13,13 +13,18 @@ injectScript(chrome.extension.getURL('/js/injected.js'), 'body');
 
 
 const syncExtension = () => {
-    chrome.runtime.sendMessage({store: localStorage.getItem(ExtensionStore)},
+    const injectedStore = localStorage.getItem(ExtensionStore);
+    console.log('Sync: App -> Ext', injectedStore);
+    chrome.runtime.sendMessage({store: injectedStore},
         function (response) {
             if (DEBUG) {
                 console.log(response);
             }
             if (response !== undefined && response.state !== undefined && response.state !== null) {
-                localStorage.setItem(ExtensionStore, response.state);
+                if(injectedStore.lastRun < JSON.parse(response.state).lastRun) {
+                    localStorage.setItem(ExtensionStore, response.state);
+                    console.log('Sync: Ext -> App', response.state);
+                }
             }
         });
 };

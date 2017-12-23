@@ -3,7 +3,6 @@ import ContactsList from "../containers/ContactListContainer";
 import {Grid, Switch, Cell} from "react-mdl";
 import {toggleActive} from "../redux/actions";
 import {connect} from "react-redux";
-import {Moment} from "react-moment";
 
 const ContactsPage = ({appActive, toggleActive, lastRun}) => {
     return <div>
@@ -15,7 +14,7 @@ const ContactsPage = ({appActive, toggleActive, lastRun}) => {
                 <Switch ripple onChange={toggleActive} checked={appActive}>Activate</Switch>
             </Cell>
         </Grid>
-        <strong>Last Run: </strong> {lastRun.toLocaleString()} <br />
+        <strong>Last Run: </strong> {new Date(lastRun).toLocaleString()} <br />
         <ContactsList/>
     </div>
 };

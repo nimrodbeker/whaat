@@ -10,7 +10,6 @@ let currentDate = new Date(); // for last run purpose
 let lastLoggingChatProcessed = null; // msg id
 let runLogicIntervalID = null;
 let runCommanderIntervalID = null;
-let store;
 let loggingChat;
 
 const whatsappLog = (msg) => {
@@ -22,8 +21,8 @@ const calculateNextCheckup = () => {
     return (new Date(currentDate.getTime() + runLogicInterval)).toLocaleString()
 };
 
-const loadStoreIfReady = () => {
-    store = store === undefined ? JSON.parse(localStorage.getItem(ExtensionStore)) : store;
+const getStoreIfReady = () => {
+    store = JSON.parse(localStorage.getItem(ExtensionStore));
     if (window.Store === undefined ||
         window.Store.Conn === undefined ||
         window.Store.Chat === undefined ||
@@ -31,7 +30,9 @@ const loadStoreIfReady = () => {
         store === undefined
     ) {
         console.log('Resources not loaded yet.');
+        return;
     }
+    return store
 };
 
 const getContactByPhone = (pno) => {
@@ -90,10 +91,15 @@ const generateRandomStater = (all_groups, contact_groups) => {
 const sendMessage = (chatObject, msg) => {
     chatObject.sendMessage(msg)
 };
+const updateStore = (store) => {
+    console.log('App -> Storage', store);
+    store.lastRun = new Date().getTime();
+    localStorage.setItem(ExtensionStore, JSON.stringify(store));
+};
 
 const Logic = () => {
+    const store = getStoreIfReady();
     if (store === undefined) {
-        loadStoreIfReady();
         return
     }
 
@@ -123,8 +129,7 @@ const Logic = () => {
             peopleYouContactOften.push(contact.chatObject.name);
         }
     }
-    store.lastRun = currentDate;
-    localStorage.setItem(ExtensionStore, JSON.stringify(store));
+    updateStore(store);
 };
 
 
@@ -187,8 +192,8 @@ const commands = {
 };
 
 const Commander = () => {
+    const store = getStoreIfReady();
     if (store === undefined) {
-        loadStoreIfReady();
         return;
     }
     if (loggingChat === undefined) {
@@ -202,6 +207,7 @@ const Commander = () => {
     }
     whatsappLog(commands[commands.hasOwnProperty(lastMsg.body.toLowerCase()) ? lastMsg.body.toLowerCase() : 'help'][1]());
     lastLoggingChatProcessed = loggingChat.msgs.last().id.id;
+    updateStore(store);
 };
 
 

@@ -1,15 +1,17 @@
 import {DEBUG} from "../consts";
-import {store as localStore} from "../index"
+import {store as guiStore} from "../index"
 import {setActive, updateContact, updateLastRun} from "../redux/actions";
 
-const enrichLocalState = (appReturnedStore) => {
-    appReturnedStore = JSON.parse(appReturnedStore);
-    localStore.dispatch(updateLastRun(appReturnedStore.lastRun));
-    for(let c in appReturnedStore.contacts){
-        const contact = appReturnedStore.contacts[c];
-        localStore.dispatch(updateContact(contact.id, contact));
+const enrichLocalState = (injectedStore) => {
+    console.log('Enrich', injectedStore);
+    if(guiStore.getState().lastRun < injectedStore.lastRun) {
+        guiStore.dispatch(updateLastRun(injectedStore.lastRun));
+        for (let c in injectedStore.contacts) {
+            const contact = injectedStore.contacts[c];
+            guiStore.dispatch(updateContact(contact.id, contact));
+        }
+        guiStore.dispatch(setActive(injectedStore.active));
     }
-    localStore.dispatch(setActive(appReturnedStore.active));
 };
 if(window.chrome.runtime.onMessage !== undefined) {
     window.chrome.runtime.onMessage.addListener(
@@ -22,7 +24,7 @@ if(window.chrome.runtime.onMessage !== undefined) {
                 // console.log(store.getState())
             }
             if (request.store !== undefined && request.store !== null) {
-                enrichLocalState(request.store)
+                enrichLocalState(JSON.parse(request.store));
             }
             sendResponse({state: localStorage.getItem('state')});
         });
