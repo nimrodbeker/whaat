@@ -1,9 +1,11 @@
-const ExtensionStore = 'ExtensionStore';
-const DAY = 3600 * 24;
-const timeConstraints = {earliest: 9, latest: 22};
-const LoggingContact = 'Logger';
-const runLogicInterval = 300 * 1000;
 const DRY_RUN_OVERRIDE = false;
+const EXTENSION_STORE = 'EXTENSION_STORE';
+const ACTIONS_QUEUE = 'ACTIONS_QUEUE';
+const LOGGING_CONTACT = 'Logger';
+const DAY = 3600 * 24;
+
+const timeConstraints = {earliest: 9, latest: 22};
+const runLogicInterval = 300 * 1000;
 const peopleYouContactOften = [];
 const peopleYouDONTContactOften = [];
 let currentDate = new Date(); // for last run purpose
@@ -12,17 +14,74 @@ let runLogicIntervalID = null;
 let runCommanderIntervalID = null;
 let loggingChat;
 
+/*
+ * action types
+ */
+const ADD_CONTACT = 'ADD_CONTACT';
+const REMOVE_CONTACT = 'REMOVE_CONTACT';
+const UPDATE_CONTACT = 'UPDATE_CONTACT';
+const CHANGE_SORT = 'CHANGE_SORT';
+const ADD_STARTERS_GROUP = 'ADD_STARTERS_GROUP';
+const REMOVE_STARTERS_GROUP = 'REMOVE_STARTERS_GROUP';
+const UPDATE_STARTERS_GROUP = 'UPDATE_STARTERS_GROUP';
+const TOGGLE_ACTIVE = 'TOGGLE_ACTIVE';
+const SET_ACTIVE = 'SET_ACTIVE';
+const UPDATE_LAST_RUN = 'UPDATE_LAST_RUN';
+
+/*
+ * action creators
+ */
+function toggleActive() {
+    return {type: TOGGLE_ACTIVE};
+}
+
+function setActive(isActive) {
+    return {type: SET_ACTIVE, isActive};
+}
+
+function addContact(contact) {
+    return {type: ADD_CONTACT, contact: contact};
+}
+
+function removeContact(id) {
+    return {type: REMOVE_CONTACT, id}
+}
+
+function updateContact(oldId, contact) {
+    return {type: UPDATE_CONTACT, oldId, contact}
+}
+
+function addStarter(groupName) {
+    return {type: ADD_STARTERS_GROUP, groupName}
+}
+
+function removeStarter(groupName) {
+    return {type: REMOVE_STARTERS_GROUP, groupName}
+}
+
+function updateStarter(groupName, groupValues) {
+    return {type: UPDATE_STARTERS_GROUP, groupName, groupValues}
+}
+
+function changeSort(key) {
+    return {type: CHANGE_SORT, key}
+}
+
+function updateLastRun(lastRun) {
+    return {type: UPDATE_LAST_RUN, lastRun}
+}
+
+
 const whatsappLog = (msg) => {
     sendMessage(loggingChat, msg)
 };
-
 
 const calculateNextCheckup = () => {
     return (new Date(currentDate.getTime() + runLogicInterval)).toLocaleString()
 };
 
 const getStoreIfReady = () => {
-    store = JSON.parse(localStorage.getItem(ExtensionStore));
+    store = JSON.parse(localStorage.getItem(EXTENSION_STORE));
     if (window.Store === undefined ||
         window.Store.Conn === undefined ||
         window.Store.Chat === undefined ||
@@ -67,10 +126,10 @@ const setOrCreateLogger = () => {
         console.log('Resources not loaded yet.');
         return;
     }
-    let loggerContactObj = getContactByName(LoggingContact);
+    let loggerContactObj = getContactByName(LOGGING_CONTACT);
     if (loggerContactObj === undefined) {
         if (confirm('Create Logging contact(group?)')) {
-            Store.Chat.createGroup(LoggingContact, undefined, undefined, [Store.Contact.get(Store.Conn.me)]);
+            Store.Chat.createGroup(LOGGING_CONTACT, undefined, undefined, [Store.Contact.get(Store.Conn.me)]);
         }
     }
     else {
@@ -92,9 +151,16 @@ const sendMessage = (chatObject, msg) => {
     chatObject.sendMessage(msg)
 };
 const updateStore = (store) => {
-    console.log('App -> Storage', store);
     store.lastRun = new Date().getTime();
-    localStorage.setItem(ExtensionStore, JSON.stringify(store));
+    localStorage.setItem(EXTENSION_STORE, JSON.stringify(store));
+};
+
+
+const addActionToQueue = (action) => {
+    const actionsQueue = JSON.parse(localStorage.getItem(ACTIONS_QUEUE)) || [];
+    actionsQueue.push(action);
+    actionsQueue.push(updateLastRun(new Date().getTime()));
+    localStorage.setItem(ACTIONS_QUEUE, JSON.stringify(actionsQueue));
 };
 
 const Logic = () => {
@@ -115,6 +181,7 @@ const Logic = () => {
     for (let c in store.contacts) {
         const contact = store.contacts[c];
         setContactObjects(contact);
+        addActionToQueue(updateContact(contact.id, contact));
         const message = generateRandomStater(store.starters, contact.starters);
         if (currentUnixTime - contact.interval * DAY > contact.lastConversation) {//currentUnixTime - timeDelta > lastMsgTime) {
             peopleYouDONTContactOften.push([contact.chatObject.name, new Date(contact.lastConversation * 1000)]);
@@ -140,14 +207,14 @@ runLogicIntervalID = setInterval(() => {
 
 
 const commands = {
-    help: ['print help', () => {
+    help: ['print help', (store) => {
         let ret = '';
         for (let k in commands) {
             ret += `${k}: ${commands[k][0]}\n`
         }
         return ret;
     }],
-    stats: ['print stats', () => {
+    stats: ['print stats', (store) => {
         let ret = `*Last checkup was at ${currentDate.toLocaleString()},* \n`;
         ret += `*You keep in touch with:* \n`;
         ret += `  ${peopleYouContactOften.join(', \n  ')}\n `;
@@ -157,35 +224,37 @@ const commands = {
         return ret;
 
     }],
-    activate: ['activate', () => {
+    activate: ['activate', (store) => {
         store.active = true;
+        addActionToQueue(setActive(store.active));
         return '*Sending messages activated*';
     }],
-    deactivate: ['deactivate', () => {
+    deactivate: ['deactivate', (store) => {
         store.active = false;
+        addActionToQueue(setActive(store.active));
         return '*Sending messages deactivated*';
     }],
-    isactive: ['return wheter messaging is active', () => {
+    isactive: ['return wheter messaging is active', (store) => {
         return store.active;
     }],
-    healthy: ['return wheter ran in last 10min', () => {
+    healthy: ['return wheter ran in last 10min', (store) => {
         return ((new Date).getTime() - currentDate.getTime()) < 10 * 60 * 1000;
     }],
-    run: ['run now', () => {
+    run: ['run now', (store) => {
         Logic();
         return '*Running core logic*';
     }],
-    disable: ['disable core logic', () => {
+    disable: ['disable core logic', (store) => {
         clearInterval(runLogicIntervalID);
         return '*Killing core logic loop*';
     }],
-    enable: ['revive core logic', () => {
+    enable: ['revive core logic', (store) => {
         runLogicIntervalID = setInterval(() => {
             Logic()
         }, runLogicInterval);
         return '*Restored core logic loop*';
     }],
-    terminate: ['Kill commander loop (irreversible remotely)', () => {
+    terminate: ['Kill commander loop (irreversible remotely)', (store) => {
         clearInterval(runCommanderIntervalID);
         return '*Killing commander loop, Manual restart required to re-operate*';
     }]
@@ -205,7 +274,7 @@ const Commander = () => {
         // Already replied to this message
         return;
     }
-    whatsappLog(commands[commands.hasOwnProperty(lastMsg.body.toLowerCase()) ? lastMsg.body.toLowerCase() : 'help'][1]());
+    whatsappLog(commands[commands.hasOwnProperty(lastMsg.body.toLowerCase()) ? lastMsg.body.toLowerCase() : 'help'][1](store));
     lastLoggingChatProcessed = loggingChat.msgs.last().id.id;
     updateStore(store);
 };
